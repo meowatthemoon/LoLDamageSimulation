@@ -1,6 +1,6 @@
 from champions.champion import Champion
 from damage.damage_type import DamageType
-from damage.pre_mitigation_damage import PreMitigationDamage
+from damage.damage_information import DamageInformation
 
 class Rengar(Champion):
     def __init__(self):
@@ -45,7 +45,7 @@ class Rengar(Champion):
         self.__bonus_attack_damage_percentage += new_bonus_attack_damage_percentage - old_bonus_attack_damage_percentage # I dont think we can access this variable so ye may have to change it to just _
         self.__passive_stacks = passive_stacks
 
-    def press_q(self, empowered : bool = False) -> PreMitigationDamage:
+    def press_q(self, empowered : bool = False) -> DamageInformation:
         total_attack_damage = self.get_total_attack_damage()
 
         # Calculate the flat damage (BASE and AD scaling)
@@ -69,7 +69,7 @@ class Rengar(Champion):
         # Add the sum of both parts
         q_damage = flat_damage + crit_damage
 
-        return PreMitigationDamage(
+        return DamageInformation(
             source_name = f"{'Empowered 'if empowered else ''}{self.__q_name}",
             damage_value = q_damage,
             damage_type = DamageType.PhysicalDamage,
@@ -79,10 +79,11 @@ class Rengar(Champion):
             is_crit = True,
             is_item = False,
             is_rune = False,
-            is_single_target = True
+            is_single_target = True,
+            pre_mitigation = True
         )
 
-    def press_w(self, empowered : bool = False) -> PreMitigationDamage:
+    def press_w(self, empowered : bool = False) -> DamageInformation:
         if empowered:
             w_base_damage = 40 + 10 * self.get_level()
             w_ability_power_ratio = 0.8
@@ -92,7 +93,7 @@ class Rengar(Champion):
 
         w_damage : float = w_base_damage + self.get_bonus_ability_power() * w_ability_power_ratio
 
-        return PreMitigationDamage(
+        return DamageInformation(
             source_name = f"{'Empowered 'if empowered else ''}{self.__w_name}",
             damage_value = w_damage,
             damage_type = DamageType.MagicalDamage,
@@ -105,7 +106,7 @@ class Rengar(Champion):
             is_single_target = False
         )
 
-    def press_e(self, empowered : bool = False) -> PreMitigationDamage:
+    def press_e(self, empowered : bool = False) -> DamageInformation:
         if empowered:
             e_base_damage = 35 + 15 * self.get_level()
         else:
@@ -115,7 +116,7 @@ class Rengar(Champion):
 
         e_damage : float = e_base_damage + self.get_bonus_attack_damage() * e_bonus_attack_damage_ratio
 
-        return PreMitigationDamage(
+        return DamageInformation(
             source_name = f"{'Empowered 'if empowered else ''}{self.__e_name}",
             damage_value = e_damage,
             damage_type = DamageType.PhysicalDamage,
@@ -128,13 +129,13 @@ class Rengar(Champion):
             is_single_target = True
         )
     
-    def press_r(self, ult_bonus : bool = False) -> PreMitigationDamage:
+    def press_r(self, ult_bonus : bool = False) -> DamageInformation:
         ult_damage : float = self.get_total_attack_damage() if ult_bonus else 0
 
         # TODO Amor Reduction De-buff
         print("WARNING: You haven't implemented Rengar's Ult Amor Reduction De-Buff!")
 
-        return PreMitigationDamage(
+        return DamageInformation(
             source_name = self.__r_name,
             damage_value = ult_damage,
             damage_type = DamageType.PhysicalDamage,

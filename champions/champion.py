@@ -1,7 +1,7 @@
 from random import uniform
 
 from damage.damage_type import DamageType
-from damage.pre_mitigation_damage import PreMitigationDamage
+from damage.damage_information import DamageInformation
 
 class Champion:
     def __init__(
@@ -62,6 +62,10 @@ class Champion:
         self.__bonus_magic_penetration_percentage : int = 0
         self.__bonus_magic_resist : int = 0
         self.__bonus_movement_speed : int = 0
+
+        # De-buffs
+        self.__total_armor_reduction_debuff : int = 0
+        self.__total_magic_resist_reduction_debuff : int = 0
 
         # Champion Variables
         self.__level : int = 0
@@ -126,7 +130,7 @@ class Champion:
     def add_bonus_movement_speed(self, bonus_movement_speed : int):
         self.__bonus_movement_speed += bonus_movement_speed
 
-    def auto_attack(self, ensure_crit : bool = False, median_crit : bool = False) -> PreMitigationDamage:
+    def auto_attack(self, ensure_crit : bool = False, median_crit : bool = False) -> DamageInformation:
         attack_damage : float = self.get_total_attack_damage()
 
         # Crit Amplification
@@ -148,7 +152,7 @@ class Champion:
                 
         attack_damage += attack_damage * crit_damage_amplification
 
-        return PreMitigationDamage(
+        return DamageInformation(
             source_name = "Auto Attack",
             damage_value = attack_damage,
             damage_type = DamageType.PhysicalDamage,
@@ -170,6 +174,9 @@ class Champion:
     def get_name(self) -> str:
         return self.__name
     
+    def get_base_armor(self) -> float:
+        return self.__calculate_base_stat(base_stat = self.__base_armor, scaling_stat = self.__scaling_armor)
+
     def get_base_attack_damage(self) -> float:
         return self.__calculate_base_stat(base_stat = self.__base_attack_damage, scaling_stat = self.__scaling_attack_damage)
     
@@ -179,6 +186,12 @@ class Champion:
     def get_base_hp(self) -> float:
         return self.__calculate_base_stat(base_stat = self.__base_hp, scaling_stat = self.__scaling_hp)
     
+    def get_base_magic_resist(self) -> float:
+        return self.__calculate_base_stat(base_stat = self.__base_magic_resist, scaling_stat = self.__scaling_magic_resist)
+    
+    def get_bonus_armor(self) -> float:
+        return self.__bonus_armor
+
     def get_bonus_attack_damage(self) -> float:
         bonus_attack_damage_ratio : float = self.__bonus_attack_damage_percentage / 100
 
@@ -195,11 +208,19 @@ class Champion:
     def get_bonus_hp(self) -> float:
         return self.__bonus_hp
     
+    def get_bonus_magic_resist(self) -> float:
+        return self.__bonus_magic_resist
+
+    def get_total_armor(self) -> float:
+        return self.get_base_armor() + self.get_bonus_armor()
+
     def get_total_armor_penetration_percentage(self) -> float:
         return self.__bonus_armor_penetration_percentage
     
+    def get_total_armor_reduction_debuff(self) -> float:
+        return self.__total_armor_reduction_debuff
+
     def get_total_attack_damage(self) -> float:
-        print(f"LOG : TOTAL AD = {self.get_base_attack_damage() + self.get_bonus_attack_damage()} | BASE AD = {self.get_base_attack_damage()} | BONUS AD = {self.get_bonus_attack_damage()}")
         return self.get_base_attack_damage() + self.get_bonus_attack_damage()
     
     def get_total_crit_amplification(self) -> int:
@@ -219,6 +240,12 @@ class Champion:
     
     def get_total_magic_penetration_percentage(self) -> float:
         return self.__bonus_magic_penetration_percentage
+    
+    def get_total_magic_resist(self) -> float:
+        return self.get_base_magic_resist() + self.get_bonus_magic_resist()
+    
+    def get_total_magic_resist_reduction_debuff(self) -> float:
+        return self.__total_magic_resist_reduction_debuff
     
     def get_q_rank(self):
         return self.__q_rank

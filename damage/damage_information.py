@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from damage.damage_type import DamageType
 
 @dataclass
-class PreMitigationDamage:
+class DamageInformation:
     source_name : str
     damage_value : float
     damage_type : DamageType
@@ -14,3 +14,4 @@ class PreMitigationDamage:
     is_item : bool
     is_rune : bool
     is_single_target : bool
+    pre_mitigation : bool

@@ -1,5 +1,5 @@
 from champions.champion import Champion
-from damage.pre_mitigation_damage import PreMitigationDamage
+from damage.damage_information import DamageInformation
 
 
 class Rune:
@@ -126,5 +126,5 @@ class Rune:
     def get_name(self) -> str:
         return self.__name
 
-    def on_damage(self, pre_mitigation_damage : PreMitigationDamage, source : Champion, target : Champion) -> PreMitigationDamage:
+    def on_damage(self, pre_mitigation_damage : DamageInformation, source : Champion, target : Champion) -> DamageInformation:
         raise NotImplementedError
