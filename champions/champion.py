@@ -274,6 +274,24 @@ class Champion:
     def set_r_rank(self, rank : int):
         self.__r_rank : int = rank
 
+    def take_damage(self, damage : DamageInformation) -> DamageInformation:
+        assert not damage.pre_mitigation, "Received pre-mitigated damage."
+        damage_taken = damage.damage_value if self.get_current_hp() >= damage.damage_value  else self.get_current_hp()
+        self.__current_hp -= damage_taken
+        return DamageInformation(
+            source_name = damage.source_name,
+            damage_type = damage.damage_type,
+            damage_value = damage_taken,
+            is_amplifiable_by_runes = damage.is_amplifiable_by_runes,
+            is_champion_ability = damage.is_champion_ability,
+            is_champion_auto_attack = damage.is_champion_auto_attack,
+            is_crit = damage.is_crit,
+            is_item = damage.is_item,
+            is_rune = damage.is_rune,
+            is_single_target = damage.is_single_target,
+            pre_mitigation = False
+        )
+
     def __calculate_base_stat(self, base_stat : float, scaling_stat):
         return base_stat + scaling_stat * (self.__level - 1) * (0.7025 + 0.0175 * (self.__level - 1))
     

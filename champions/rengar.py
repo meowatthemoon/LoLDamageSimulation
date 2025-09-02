@@ -30,10 +30,6 @@ class Rengar(Champion):
 
         print("WARNING: Rengar Constructor has ability names, this should be generalized for all champions in the future!")
         print("WARNING: Rengar Constructor - have to double check base stats!")
-        print("WARNING: Rengar missing Q function!")
-        print("WARNING: Rengar missing W function!")
-        print("WARNING: Rengar missing E function!")
-        print("WARNING: Rengar missing R function!")
 
     def get_passive_stacks(self) -> int:
         return self.__passive_stacks

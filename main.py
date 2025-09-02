@@ -113,10 +113,11 @@ def main():
     total_pre = 0
     total_post = 0
     for damage_source in damage_sources:
-        print(damage_source)
         total_pre += damage_source.damage_value
         post_mitigation_damage = calculate_post_mitigation_damage(pre_mitigation_damage = damage_source, source = rengar, target = dummy)
         total_post += post_mitigation_damage.damage_value
+        result_damage = dummy.take_damage(damage = post_mitigation_damage)
+        print(f"{result_damage.source_name} : {result_damage.damage_value} ({result_damage.damage_value / dummy.get_total_hp() * 100})")
     print(f"TOTAL PRE : {total_pre}")
     print(f"TOTAL POST: {total_post}")
     print("-"*20)
@@ -128,10 +129,11 @@ def main():
     total_pre = 0
     total_post = 0
     for damage_source in damage_sources:
-        print(damage_source)
         total_pre += damage_source.damage_value
         post_mitigation_damage = calculate_post_mitigation_damage(pre_mitigation_damage = damage_source, source = rengar, target = dummy)
         total_post += post_mitigation_damage.damage_value
+        result_damage = dummy.take_damage(damage = post_mitigation_damage)
+        print(f"{result_damage.source_name} : {result_damage.damage_value} ({result_damage.damage_value / dummy.get_total_hp() * 100})")
     print(f"TOTAL PRE : {total_pre}")
     print(f"TOTAL POST: {total_post}")
     print("-"*20)
