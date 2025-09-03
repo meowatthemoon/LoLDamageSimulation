@@ -162,7 +162,8 @@ class Champion:
             is_crit = is_crit,
             is_item = False,
             is_rune = False,
-            is_single_target = True
+            is_single_target = True,
+            pre_mitigation = True
         )
     
     def get_current_hp(self) -> float:

@@ -79,151 +79,119 @@ def calculate_post_mitigation_damage(pre_mitigation_damage : DamageInformation, 
         is_single_target = pre_mitigation_damage.is_single_target,
         pre_mitigation = False
     )
+class Simulation:
+    def __init__(
+            self, 
+            source_champion : Champion, 
+            source_champion_level : int, 
+            source_champion_q_rank : int,
+            source_champion_w_rank : int,
+            source_champion_e_rank : int,
+            source_champion_r_rank : int,
+            source_champion_items : list[Item],
+            source_champion_runes : list[Rune],
+            target_champion : Champion, 
+            target_champion_level : int,
+            target_champion_q_rank : int,
+            target_champion_w_rank : int,
+            target_champion_e_rank : int,
+            target_champion_r_rank : int,
+            target_champion_items : list[Item] = None,
+            target_champion_runes : list[Rune] = None,
+        ):
 
+        self.__source_champion : Champion = source_champion
+        self.__source_champion.set_level(level = source_champion_level)
+        self.__source_champion.set_q_rank(rank = source_champion_q_rank)
+        self.__source_champion.set_w_rank(rank = source_champion_w_rank)
+        self.__source_champion.set_e_rank(rank = source_champion_e_rank)
+        self.__source_champion.set_r_rank(rank = source_champion_r_rank)
 
-def main():
-    # Source Champion
-    rengar = Rengar()
-    
-    rengar.set_level(level = 18)
-    rengar.set_q_rank(rank = 5)
-    rengar.set_w_rank(rank = 5)
-    rengar.set_e_rank(rank = 5)
-    rengar.set_r_rank(rank = 3)
+        for item in source_champion_items:
+            item.add_to_champion(champion = self.__source_champion)
 
-    # Runes
-    runes : list[Rune] = [PressTheAttack(), CutDown(), RuneStatAttackDamage(), RuneStatAttackDamage()]
-    for rune in runes:
-        rune.add_to_champion(champion = rengar)
+        self.__source_champion_runes : list[Rune] = source_champion_runes
+        for rune in source_champion_runes:
+            rune.add_to_champion(champion = self.__source_champion)
 
-    # Items
-    items : list[Item] = [RavenousHydra(), MortalReminder(), InfinityEdge()]
-    for item in items:
-        item.add_to_champion(champion = rengar)
+        self.__target_champion : Champion = target_champion
+        self.__target_champion.set_level(level = target_champion_level)
+        self.__target_champion.set_q_rank(rank = target_champion_q_rank)
+        self.__target_champion.set_w_rank(rank = target_champion_w_rank)
+        self.__target_champion.set_e_rank(rank = target_champion_e_rank)
+        self.__target_champion.set_r_rank(rank = target_champion_r_rank)
 
-    # Target Champion
-    dummy = TargetDummy()
+        for item in target_champion_items:
+            item.add_to_champion(champion = self.__target_champion)
 
-    # Simulation
-    # Q - Savagery
-    damage_sources : list[DamageInformation] = []
-    normal_q_pre_mitigation_damage = rengar.press_q(empowered = False)
-    damage_sources.append(normal_q_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = normal_q_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total_pre = 0
-    total_post = 0
-    for damage_source in damage_sources:
-        total_pre += damage_source.damage_value
-        post_mitigation_damage = calculate_post_mitigation_damage(pre_mitigation_damage = damage_source, source = rengar, target = dummy)
-        total_post += post_mitigation_damage.damage_value
-        result_damage = dummy.take_damage(damage = post_mitigation_damage)
-        print(f"{result_damage.source_name} : {result_damage.damage_value} ({result_damage.damage_value / dummy.get_total_hp() * 100})")
-    print(f"TOTAL PRE : {total_pre}")
-    print(f"TOTAL POST: {total_post}")
-    print("-"*20)
+        for rune in target_champion_runes:
+            rune.add_to_champion(champion = self.__target_champion)
 
-    damage_sources : list[DamageInformation] = []
-    empowered_q_pre_mitigation_damage = rengar.press_q(empowered = True)
-    damage_sources.append(empowered_q_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = empowered_q_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total_pre = 0
-    total_post = 0
-    for damage_source in damage_sources:
-        total_pre += damage_source.damage_value
-        post_mitigation_damage = calculate_post_mitigation_damage(pre_mitigation_damage = damage_source, source = rengar, target = dummy)
-        total_post += post_mitigation_damage.damage_value
-        result_damage = dummy.take_damage(damage = post_mitigation_damage)
-        print(f"{result_damage.source_name} : {result_damage.damage_value} ({result_damage.damage_value / dummy.get_total_hp() * 100})")
-    print(f"TOTAL PRE : {total_pre}")
-    print(f"TOTAL POST: {total_post}")
-    print("-"*20)
+    def simulate(self, combo : list, combo_args : list):
+        for spell_cast, spell_args in zip(combo, combo_args):
+            spell_damage_sources : list[DamageInformation] = []
+            spell_pre_mitigation_damage : DamageInformation = spell_cast(*spell_args)
+            spell_damage_sources.append(spell_pre_mitigation_damage)
+            spell_damage_sources += recursively_apply_runes(
+                pre_mitigation_damage = spell_pre_mitigation_damage, 
+                source = self.__source_champion, 
+                target = self.__target_champion, 
+                runes = self.__source_champion_runes
+            )
 
-    """
-    # W - Battle Roar
-    damage_sources : list[DamageInformation] = []
-    normal_w_pre_mitigation_damage = rengar.press_w(empowered = False)
-    damage_sources.append(normal_w_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = normal_w_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total = 0
-    for damage_source in damage_sources:
-        print(damage_source)
-        total += damage_source.damage_value
-    print(f"TOTAL : {total}")
-    print("-"*20)
+            total_damage_pre_mitigated, total_damage_post_mitigated = 0, 0
+            for spell_damage_source in spell_damage_sources:
+                total_damage_pre_mitigated += spell_damage_source.damage_value
+                post_mitigation_damage = calculate_post_mitigation_damage(
+                    pre_mitigation_damage = spell_damage_source, 
+                    source = self.__source_champion, 
+                    target = self.__target_champion
+                )
+                total_damage_post_mitigated += post_mitigation_damage.damage_value
+                self.__target_champion.take_damage(damage = post_mitigation_damage)
 
-    damage_sources : list[DamageInformation] = []
-    empowered_w_pre_mitigation_damage = rengar.press_w(empowered = True)
-    damage_sources.append(empowered_w_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = empowered_w_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total = 0
-    for damage_source in damage_sources:
-        print(damage_source)
-        total += damage_source.damage_value
-    print(f"TOTAL : {total}")
-    print("-"*20)
-    """
-
-    
-
-    """
-    # E - Bola Strike
-    damage_sources : list[DamageInformation] = []
-    normal_e_pre_mitigation_damage = rengar.press_e(empowered = False)
-    damage_sources.append(normal_e_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = normal_e_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total = 0
-    for damage_source in damage_sources:
-        print(damage_source)
-        total += damage_source.damage_value
-    print(f"TOTAL : {total}")
-    print("-"*20)
-
-    damage_sources : list[DamageInformation] = []
-    empowered_e_pre_mitigation_damage = rengar.press_e(empowered = True)
-    damage_sources.append(empowered_e_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = empowered_e_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total = 0
-    for damage_source in damage_sources:
-        print(damage_source)
-        total += damage_source.damage_value
-    print(f"TOTAL : {total}")
-    print("-"*20)
-    """
-
-    """
-    # R - Thrill of the Hunt
-    damage_sources : list[DamageInformation] = []
-    auto_attack_pre_mitigation_damage = rengar.auto_attack()
-    damage_sources.append(auto_attack_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = auto_attack_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-
-    normal_r_pre_mitigation_damage = rengar.press_r(ult_bonus = True)
-    damage_sources.append(normal_r_pre_mitigation_damage)
-    damage_sources += recursively_apply_runes(pre_mitigation_damage = normal_r_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-    total = 0
-    for damage_source in damage_sources:
-        print(damage_source)
-        total += damage_source.damage_value
-    print(f"TOTAL : {total}")
-    print("-"*20)
-    """
-
-    """
-    # 4 Auto Attacks
-    for _ in range(4):
-        damage_sources : list[DamageInformation] = []
-        auto_attack_pre_mitigation_damage = rengar.auto_attack()
-        damage_sources.append(auto_attack_pre_mitigation_damage)
-        damage_sources += recursively_apply_runes(pre_mitigation_damage = auto_attack_pre_mitigation_damage, source = rengar, target = dummy, runes = runes)
-
-        total = 0
-        for damage_source in damage_sources:
-            print(damage_source)
-            total += damage_source.damage_value
-        print(f"TOTAL : {total}")
-        print("-"*20)
-    """
-
+            print(f"{spell_pre_mitigation_damage.source_name}: {int(total_damage_post_mitigated)} ({total_damage_post_mitigated / self.__target_champion.get_total_hp() *100}%)")
+        print(f"{self.__target_champion.get_name()} was left with {int(self.__target_champion.get_current_hp())}/{int(self.__target_champion.get_total_hp())} ({self.__target_champion.get_current_hp() / self.__target_champion.get_total_hp() * 100}%)")
 
 if __name__ == '__main__':
-    main()
+    source_champion_class : Champion = Rengar
+    target_champion_class : Champion = TargetDummy
+
+    source_champion = source_champion_class()
+    target_champion = target_champion_class()
+    #main()
+    simulation = Simulation(
+        source_champion = source_champion, 
+        source_champion_level = 18, 
+        source_champion_q_rank = 5,
+        source_champion_w_rank = 5,
+        source_champion_e_rank = 5,
+        source_champion_r_rank = 5,
+        source_champion_items = [],
+        source_champion_runes = [PressTheAttack(), CutDown(), RuneStatAttackDamage(), RuneStatAttackDamage()],
+        target_champion = target_champion, 
+        target_champion_level = 18,
+        target_champion_q_rank = 5,
+        target_champion_w_rank = 5,
+        target_champion_e_rank = 5,
+        target_champion_r_rank = 5,
+        target_champion_items = [],
+        target_champion_runes = [],
+    )
+
+    combo = [
+        source_champion_class.press_q,
+        source_champion_class.press_w,
+        source_champion_class.press_e,
+        source_champion_class.auto_attack,
+        source_champion_class.press_q,
+    ]
+    combo_args = [
+        (source_champion, False),
+        (source_champion, False),
+        (source_champion, False),
+        (source_champion,),
+        (source_champion, True),
+    ]
+
+    simulation.simulate(combo = combo, combo_args = combo_args)

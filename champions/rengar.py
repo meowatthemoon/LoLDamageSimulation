@@ -99,7 +99,8 @@ class Rengar(Champion):
             is_crit = False,
             is_item = False,
             is_rune = False,
-            is_single_target = False
+            is_single_target = False,
+            pre_mitigation = True
         )
 
     def press_e(self, empowered : bool = False) -> DamageInformation:
@@ -122,7 +123,8 @@ class Rengar(Champion):
             is_crit = False,
             is_item = False,
             is_rune = False,
-            is_single_target = True
+            is_single_target = True,
+            pre_mitigation = True
         )
     
     def press_r(self, ult_bonus : bool = False) -> DamageInformation:
@@ -141,5 +143,6 @@ class Rengar(Champion):
             is_crit = False,
             is_item = False,
             is_rune = False,
-            is_single_target = True
+            is_single_target = True,
+            pre_mitigation = True
         )
